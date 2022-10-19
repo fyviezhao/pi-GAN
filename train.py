@@ -359,7 +359,7 @@ def train(rank, world_size, opt):
                 generated_dir = os.path.join(opt.output_dir, 'evaluation/generated')
 
                 if rank == 0:
-                    fid_evaluation.setup_evaluation(metadata['dataset'], generated_dir, target_size=128)
+                    fid_evaluation.setup_evaluation(metadata['dataset'], generated_dir, dataset_path=metadata["dataset_path"], target_size=128)
                 dist.barrier()
                 ema.store(generator_ddp.parameters())
                 ema.copy_to(generator_ddp.parameters())
@@ -388,7 +388,7 @@ if __name__ == '__main__':
     parser.add_argument('--output_dir', type=str, default='debug')
     parser.add_argument('--load_dir', type=str, default='')
     parser.add_argument('--curriculum', type=str, required=True)
-    parser.add_argument('--eval_freq', type=int, default=5000)
+    parser.add_argument('--eval_freq', type=int, default=1)
     parser.add_argument('--port', type=str, default='12355')
     parser.add_argument('--set_step', type=int, default=None)
     parser.add_argument('--model_save_interval', type=int, default=5000)

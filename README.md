@@ -13,6 +13,12 @@ This is the official implementation of the paper "π-GAN: Periodic Implicit Gene
 
 https://user-images.githubusercontent.com/9628319/122865841-e2d1c080-d2db-11eb-9621-1e176db59352.mp4
 
+## Requirements
+```
+$ conda create -n pigan python=3.7
+$ pip install -r requirements.txt
+```
+
 ## Training a Model
 
 The main training script can be found in train.py. Majority of hyperparameters for training and evaluation are set in the curriculums.py file. (see file for more details) We provide recommended curriculums for CelebA, Cats, and CARLA.

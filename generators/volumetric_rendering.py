@@ -63,6 +63,12 @@ def get_initial_rays_trig(n, num_steps, device, fov, resolution, ray_start, ray_
     # Y is flipped to follow image memory layouts.
     x, y = torch.meshgrid(torch.linspace(-1, 1, W, device=device),
                           torch.linspace(1, -1, H, device=device))
+    # x.T:                 y.T:
+    # -1, . . ., 1         1, . . ., 1 
+    # .          .         .         .
+    # .          .         .         .
+    # .          .         .         .
+    # -1, . . ., 1        -1, . . ., -1
     x = x.T.flatten()
     y = y.T.flatten()
     z = -torch.ones_like(x, device=device) / np.tan((2 * math.pi * fov / 360)/2)
@@ -97,7 +103,7 @@ def transform_sampled_points(points, z_vals, ray_directions, device, h_stddev=1,
 
 
     camera_origin, pitch, yaw = sample_camera_positions(n=points.shape[0], r=1, horizontal_stddev=h_stddev, vertical_stddev=v_stddev, horizontal_mean=h_mean, vertical_mean=v_mean, device=device, mode=mode)
-    forward_vector = normalize_vecs(-camera_origin)
+    forward_vector = normalize_vecs(-camera_origin) # cam dir. that points to the origin
 
     cam2world_matrix = create_cam2world_matrix(forward_vector, camera_origin, device=device)
 
@@ -167,10 +173,14 @@ def sample_camera_positions(device, n=1, r=1, horizontal_stddev=1, vertical_stdd
     phi = torch.clamp(phi, 1e-5, math.pi - 1e-5)
 
     output_points = torch.zeros((n, 3), device=device)
+    # y: up, x: left, z: into screen (OpenGL convention)
+    # phi: angle between eye and +y axis ~ [0,pi]
+    # theta: angle between eye and +x axis ~ [-pi, pi]
+    # e.g., phi=theta=pi/2 -> (0,0,1); phi=pi/2, theta=0 -> (1,0,0)
     output_points[:, 0:1] = r*torch.sin(phi) * torch.cos(theta)
     output_points[:, 2:3] = r*torch.sin(phi) * torch.sin(theta)
     output_points[:, 1:2] = r*torch.cos(phi)
-
+    # phi: pitch; theta: yaw
     return output_points, phi, theta
 
 def create_cam2world_matrix(forward_vector, origin, device=None):
@@ -218,7 +228,7 @@ def sample_pdf(bins, weights, N_importance, det=False, eps=1e-5):
     N_rays, N_samples_ = weights.shape
     weights = weights + eps # prevent division by zero (don't do inplace op!)
     pdf = weights / torch.sum(weights, -1, keepdim=True) # (N_rays, N_samples_)
-    cdf = torch.cumsum(pdf, -1) # (N_rays, N_samples), cumulative distribution function
+    cdf = torch.cumsum(pdf, -1) # (N_rays, N_samples_), cumulative distribution function
     cdf = torch.cat([torch.zeros_like(cdf[: ,:1]), cdf], -1)  # (N_rays, N_samples_+1)
                                                                # padded to 0~1 inclusive
 

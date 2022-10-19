@@ -200,7 +200,7 @@ class SPATIALSIRENBASELINE(nn.Module):
     def forward_with_frequencies_phase_shifts(self, input, frequencies, phase_shifts, ray_directions, **kwargs):
         frequencies = frequencies*15 + 30
         
-        input = self.gridwarper(input)
+        input = self.gridwarper(input) # i.e., normalized pts used in StyleSDF
         x = input
             
         for index, layer in enumerate(self.network):

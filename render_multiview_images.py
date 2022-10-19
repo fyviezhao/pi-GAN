@@ -69,6 +69,7 @@ if __name__ == '__main__':
     face_angles = [a + curriculum['h_mean'] for a in face_angles]
 
     for seed in tqdm(opt.seeds):
+        seed = int(seed)
         images = []
         for i, yaw in enumerate(face_angles):
             curriculum['h_mean'] = yaw
